@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Wallet Demo – One File</title>
+<style>
+  :root{--indigo:#4f46e5;--bg:#f8fafc;--fg:#0f172a;}
+  *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;background:var(--bg);color:var(--fg)}
+  a,button{cursor:pointer}
+  .container{max-width:980px;margin:auto;padding:16px}
+  .card{background:#fff;border-radius:16px;box-shadow:0 6px 20px rgba(2,6,23,.06);padding:16px}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .btn{background:var(--indigo);color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:600}
+  .btn.outline{background:#fff;color:var(--indigo);border:2px solid var(--indigo)}
+  .btn.gray{background:#e5e7eb;color:#111827}
+  input,select{border:1px solid #e5e7eb;border-radius:10px;padding:10px;width:100%}
+  label{font-size:12px;color:#64748b;margin-bottom:4px;display:block}
+  .grid{display:grid;gap:12px}
+  .cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .nav{background:#fff;box-shadow:0 1px 12px rgba(2,6,23,.05)}
+  .hidden{display:none}
+  .pill{font-size:12px;background:#eef2ff;color:#3730a3;padding:4px 8px;border-radius:999px}
+  .badge{font-size:11px;padding:2px 6px;border-radius:999px;background:#f1f5f9;color:#0f172a}
+  .item{border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}
+  .item img{width:100%;height:150px;object-fit:cover}
+  .muted{color:#6b7280;font-size:12px}
+  .right{margin-left:auto}
+</style>
+</head>
+<body>
+  <div class="nav">
+    <div class="container row" style="align-items:center;justify-content:space-between">
+      <div><strong>Wallet<span style="color:var(--indigo)">One</span></strong></div>
+      <div class="row" style="align-items:center">
+        <select id="langSelect" onchange="changeLang(this.value)">
+          <option value="en">English</option>
+          <option value="si">සිංහල</option>
+          <option value="ta">தமிழ்</option>
+        </select>
+        <button class="btn outline" onclick="showView('loginView')" data-i18n="login">Login</button>
+        <button class="btn" onclick="showView('registerView')" data-i18n="register">Register</button>
+        <button id="navDash" class="btn outline hidden" onclick="showView('dashView')" data-i18n="dashboard">Dashboard</button>
+        <button id="navAdmin" class="btn outline hidden" onclick="showView('adminView')" data-i18n="admin_panel">Admin</button>
+        <button id="navLogout" class="btn gray hidden" onclick="logout()" data-i18n="logout">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" id="homeView">
+    <div class="row" style="align-items:center; margin:20px 0">
+      <div class="card" style="flex:1">
+        <h1 data-i18n="hero_title">Simple Wallet & Marketplace (One File)</h1>
+        <p class="muted" data-i18n="hero_sub">Register/Login, balance, withdrawals, and upload images to sell — all saved in your browser (no server needed).</p>
+        <div class="row">
+          <button class="btn" onclick="showView('registerView')" data-i18n="get_started">Get Started</button>
+          <button class="btn outline" onclick="showView('adminView')" data-i18n="admin_panel">Admin Panel</button>
+          <span class="pill" data-i18n="demo_notice">Demo only: not production-ready.</span>
+        </div>
+      </div>
+      <div class="card" style="width:360px">
+        <h3 data-i18n="features">Features</h3>
+        <ul style="margin:0 0 0 16px;padding:0">
+          <li data-i18n="feat_multi">Sinhala / English / Tamil interface</li>
+          <li data-i18n="feat_auth">Register, login, profile picture, phone number</li>
+          <li data-i18n="feat_balance">User balance, add/subtract (admin)</li>
+          <li data-i18n="feat_withdraw">Withdrawal requests & approvals</li>
+          <li data-i18n="feat_market">Upload images as items to sell</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Register -->
+  <div class="container hidden" id="registerView">
+    <div class="card">
+      <h2 data-i18n="register">Register</h2>
+      <div class="grid cols-2">
+        <div>
+          <label data-i18n="full_name">Full Name</label>
+          <input id="regName" placeholder="Jane Doe">
+        </div>
+        <div>
+          <label data-i18n="phone">Phone Number</label>
+          <input id="regPhone" placeholder="+94...">
+        </div>
+        <div>
+          <label data-i18n="password">Password</label>
+          <input id="regPass" type="password">
+        </div>
+        <div>
+          <label data-i18n="confirm_password">Confirm Password</label>
+          <input id="regPass2" type="password">
+        </div>
+        <div>
+          <label data-i18n="profile_pic">Profile Picture</label>
+          <input id="regPhoto" type="file" accept="image/*">
+        </div>
+        <div>
+          <label data-i18n="language">Language</label>
+          <select id="regLang">
+            <option value="en">English</option>
+            <option value="si">සිංහල</option>
+            <option value="ta">தமிழ்</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn" onclick="registerUser()" data-i18n="create_account">Create Account</button>
+        <button class="btn gray" onclick="showView('loginView')" data-i18n="login">Login</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login -->
+  <div class="container hidden" id="loginView">
+    <div class="card" style="max-width:480px">
+      <h2 data-i18n="login">Login</h2>
+      <label data-i18n="phone">Phone Number</label>
+      <input id="loginPhone" placeholder="+94...">
+      <label data-i18n="password" style="margin-top:8px">Password</label>
+      <input id="loginPass" type="password">
+      <div class="row" style="margin-top:12px">
+        <button class="btn" onclick="login()" data-i18n="login">Login</button>
+        <button class="btn gray" onclick="showView('registerView')" data-i18n="register">Register</button>
+      </div>
+      <p class="muted" style="margin-top:8px">Admin seed: +94000000000 / admin</p>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="container hidden" id="dashView">
+    <div class="row">
+      <div class="card" style="flex:1;min-width:260px">
+        <div class="row" style="align-items:center">
+          <img id="mePhoto" style="width:64px;height:64px;border-radius:999px;background:#f1f5f9;object-fit:cover">
+          <div>
+            <div id="meName" style="font-weight:700"></div>
+            <div id="mePhone" class="muted"></div>
+          </div>
+          <span class="right badge" data-i18n="balance">Balance</span>
+        </div>
+        <div style="font-size:28px;font-weight:800;margin-top:6px" id="meBalance">0.00</div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn" onclick="promptWithdraw()" data-i18n="request_withdrawal">Request Withdrawal</button>
+        </div>
+      </div>
+
+      <div class="card" style="flex:2;min-width:300px">
+        <h3 data-i18n="sell_items">Sell Items (Images)</h3>
+        <div class="row">
+          <input type="file" id="itemImage" accept="image/*" style="flex:1">
+          <input id="itemTitle" placeholder="Title" style="flex:2">
+          <input id="itemPrice" type="number" step="0.01" min="0" placeholder="Price" style="width:120px">
+          <button class="btn" onclick="addItem()" data-i18n="add_item">Add Item</button>
+        </div>
+        <div id="itemsGrid" class="grid cols-3" style="margin-top:12px"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h3 data-i18n="withdrawal_history">Withdrawal Requests</h3>
+      <div id="withdrawalsList"></div>
+    </div>
+  </div>
+
+  <!-- Admin -->
+  <div class="container hidden" id="adminView">
+    <div class="card">
+      <h2 data-i18n="admin_panel">Admin Panel</h2>
+      <div class="grid cols-3" id="usersTable" style="align-items:end"></div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h3 data-i18n="withdrawals">Withdrawal Requests</h3>
+      <div id="adminWithdrawals"></div>
+    </div>
+  </div>
+
+<script>
+/* ===== i18n ===== */
+const DICT = {
+  en:{login:"Login",register:"Register",logout:"Logout",dashboard:"Dashboard",admin_panel:"Admin Panel",
+      hero_title:"Simple Wallet & Marketplace (One File)",
+      hero_sub:"Register/Login, balance, withdrawals, and upload images to sell — all saved in your browser (no server needed).",
+      get_started:"Get Started",features:"Features",
+      feat_multi:"Sinhala / English / Tamil interface",feat_auth:"Register, login, profile picture, phone number",
+      feat_balance:"User balance, add/subtract (admin)",feat_withdraw:"Withdrawal requests & approvals",
+      feat_market:"Upload images as items to sell",demo_notice:"Demo only: not production-ready.",
+      full_name:"Full Name",phone:"Phone Number",password:"Password",confirm_password:"Confirm Password",
+      profile_pic:"Profile Picture",language:"Language",create_account:"Create Account",
+      balance:"Balance",request_withdrawal:"Request Withdrawal",sell_items:"Sell Items (Images)",
+      add_item:"Add Item",withdrawal_history:"Withdrawal Requests",users:"Users",withdrawals:"Withdrawal Requests",
+      approve:"Approve",reject:"Reject",actions:"Actions",role_admin:"Admin",role_user:"User",
+      saved:"Saved",invalid:"Invalid credentials",amt:"Amount to withdraw?"
+  },
+  si:{login:"ඇතුල් වන්න",register:"ලියාපදිංචි වන්න",logout:"නික්ම යන්න",dashboard:"ඩැෂ්බෝර්ඩ්",admin_panel:"පරිපාලන පුවරුව",
+      hero_title:"එක් ෆයිල් එකක Wallet & වෙළඳපොළ",hero_sub:"ලියාපදිංචි/ඇතුල්වීම, ශේෂය, ආපසු ගැනීම්, රූප විකිණීම — Browser එකේම සුරැකේ (server නැහැ).",
+      get_started:"ආරම්භ කරන්න",features:"විශේෂාංග",
+      feat_multi:"සිංහල / English / தமிழ் අතුරුමුහුණත",feat_auth:"ලියාපදිංචි වීම, ඇතුල්වීම, පැතිරුව, දුරකතන අංකය",
+      feat_balance:"ශේෂය, එකතු/අඩු කිරීම (පරිපාලක)",feat_withdraw:"ආපසු ගැනීම් ඉල්ලීම් හා අනුමැතිය",
+      feat_market:"විකිණීමට රූප උඩුගත කරන්න",demo_notice:"ඩෙමෝ පමණක්: නිෂ්පාදන සඳහා නොවේ.",
+      full_name:"සම්පූර්ණ නම",phone:"දුරකථන අංකය",password:"මුරපදය",confirm_password:"මුරපදය නැවත",
+      profile_pic:"පැතිරුව රූපය",language:"භාෂාව",create_account:"ගිණුම සෑදීම",
+      balance:"ශේෂය",request_withdrawal:"ආපසු ගැනීමක් ඉල්ලන්න",sell_items:"වස්තු විකිණීම (රූප)",add_item:"ඇතුළත් කරන්න",
+      withdrawal_history:"ආපසු ගැනීම් ඉල්ලීම්",users:"පරිශීලකයන්",withdrawals:"ආපසු ගැනීම්",approve:"අනුමත",reject:"ප්‍රතික්ෂේප",
+      actions:"ක්‍රියා",role_admin:"පරිපාලක",role_user:"පරිශීලක",saved:"සුරক্ষිතයි",invalid:"වැරදි ලඝු-තොරතුරු",amt:"ඇප ගන්න මුදල?"
+  },
+  ta:{login:"உள்நுழை",register:"பதிவு செய்",logout:"வெளியேறு",dashboard:"டாஷ்போர்டு",admin_panel:"நிர்வாக பலகை",
+      hero_title:"ஒரே கோப்பில் பணப்பை & சந்தை",hero_sub:"பதிவு/உள்நுழைவு, இருப்பு, திரும்பப் பெறல், படங்களை விற்க — உலாவியில் சேமிக்கும் (சேவையகம் இல்லை).",
+      get_started:"தொடங்கவும்",features:"அம்சங்கள்",
+      feat_multi:"සිංහල / English / தமிழ் இடைமுகம்",feat_auth:"பதிவு, உள்நுழை, சுயவிவர படம், தொலைபேசி எண்",
+      feat_balance:"இருப்பு, கூட்ட/குறைத்தல் (நிர்வாகம்)",feat_withdraw:"திரும்பப் பெறல் கோரிக்கைகள் & ஒப்புதல்",
+      feat_market:"விற்க படங்களை பதிவேற்றவும்",demo_notice:"டெமோ மட்டும்: உற்பத்திக்கு அல்ல.",
+      full_name:"முழு பெயர்",phone:"தொலைபேசி எண்",password:"கடவுச்சொல்",confirm_password:"கடவுச்சொல் உறுதிப்படுத்து",
+      profile_pic:"சுயவிவர படம்",language:"மொழி",create_account:"கணக்கை உருவாக்கு",
+      balance:"இருப்பு",request_withdrawal:"திரும்பப் பெற கோருக",sell_items:"விற்பனைப் பொருட்கள் (படங்கள்)",
+      add_item:"பொருள் சேர்க்க",withdrawal_history:"திரும்பப் பெறும் கோரிக்கைகள்",
+      users:"பயனர்கள்",withdrawals:"திரும்பப் பெறல்கள்",approve:"ஒப்புதல்",reject:"நிராகரி",actions:"செயல்கள்",
+      role_admin:"நிர்வாகி",role_user:"பயனர்",saved:"சேமிக்கப்பட்டது",invalid:"தவறான விபரங்கள்",amt:"திரும்பப் பெற தொகை?"
+  }
+};
+function t(key){ const L=getLang(); return DICT[L]?.[key]||DICT.en[key]||key }
+function getLang(){ return localStorage.getItem('lang')||'en' }
+function changeLang(code){ localStorage.setItem('lang',code); applyLang() }
+function applyLang(){ document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
+  document.getElementById('langSelect').value=getLang() }
+
+/* ===== simple db in localStorage ===== */
+const DBKEY='walletOneDB';
+function loadDB(){ const raw=localStorage.getItem(DBKEY); if(raw) return JSON.parse(raw);
+  // seed admin
+  const db={ users:[], items:[], withdrawals:[] };
+  db.users.push({id:1,name:'Admin',phone:'+94000000000',pass:'admin',role:'admin',balance:100000,lang:'en',photo:null});
+  saveDB(db); return db;
+}
+function saveDB(db){ localStorage.setItem(DBKEY, JSON.stringify(db)) }
+function uid(list){ return (list.at(-1)?.id||0)+1 }
+
+/* ===== session ===== */
+function setSession(user){ localStorage.setItem('meId', user.id); localStorage.setItem('lang', user.lang||'en'); }
+function getMe(){ const db=loadDB(); const id=Number(localStorage.getItem('meId')); return db.users.find(u=>u.id===id)||null }
+function logout(){ localStorage.removeItem('meId'); refreshNav(); showView('loginView') }
+
+/* ===== views ===== */
+function showView(id){
+  ['homeView','registerView','loginView','dashView','adminView'].forEach(v=>document.getElementById(v).classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  if(id==='dashView') renderDash();
+  if(id==='adminView') renderAdmin();
+  applyLang();
+}
+function refreshNav(){
+  const me=getMe();
+  document.getElementById('navDash').classList.toggle('hidden', !me);
+  document.getElementById('navLogout').classList.toggle('hidden', !me);
+  document.getElementById('navAdmin').classList.toggle('hidden', !(me && me.role==='admin'));
+}
+
+/* ===== register/login ===== */
+async function fileToDataURL(file){ if(!file) return null; return new Promise((res)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(file) }) }
+async function registerUser(){
+  const name=document.getElementById('regName').value.trim();
+  const phone=document.getElementById('regPhone').value.trim();
+  const pass=document.getElementById('regPass').value;
+  const pass2=document.getElementById('regPass2').value;
+  const lang=document.getElementById('regLang').value;
+  const photo=await fileToDataURL(document.getElementById('regPhoto').files[0]);
+  if(!name||!phone||!pass||pass!==pass2){ alert('Check fields'); return }
+  const db=loadDB();
+  if(db.users.find(u=>u.phone===phone)){ alert('Phone exists'); return }
+  const id=uid(db.users);
+  db.users.push({id,name,phone,pass,role:'user',balance:0,lang,photo:photo||null});
+  saveDB(db);
+  setSession({id,lang});
+  showView('dashView'); refreshNav();
+}
+function login(){
+  const phone=document.getElementById('loginPhone').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  const db=loadDB();
+  const u=db.users.find(x=>x.phone===phone && x.pass===pass);
+  if(!u){ alert(t('invalid')); return }
+  setSession(u); refreshNav(); showView(u.role==='admin'?'adminView':'dashView');
+}
+
+/* ===== dashboard ===== */
+function renderDash(){
+  const me=getMe(); if(!me){ showView('loginView'); return }
+  document.getElementById('meName').textContent=me.name;
+  document.getElementById('mePhone').textContent=me.phone;
+  document.getElementById('mePhoto').src=me.photo || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0nNjQnIGhlaWdodD0nNjQnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zyc+PGNpcmNsZSBjeD0nMzInIGN5PScyNCcgcj0nMTInIGZpbGw9JyNlMWU1ZTYnLz48cmVjdCB4PScxNicgeT0nMzYnIHdpZHRoPSczMicgaGVpZ2h0PScxMicgZmlsbD0nI2Q2ZGJlZicvPjwvc3ZnPg==';
+  document.getElementById('meBalance').textContent = Number(me.balance||0).toFixed(2);
+  renderItems();
+  renderWithdrawals();
+}
+function addItem(){
+  const me=getMe(); const db=loadDB();
+  const f=document.getElementById('itemImage').files[0];
+  const title=document.getElementById('itemTitle').value.trim();
+  const price=parseFloat(document.getElementById('itemPrice').value||'0');
+  if(!f || !title) return;
+  fileToDataURL(f).then(data=>{
+    const id=uid(db.items);
+    db.items.push({id,owner:me.id,title,price,img:data,createdAt:Date.now()});
+    saveDB(db);
+    document.getElementById('itemImage').value='';
+    document.getElementById('itemTitle').value='';
+    document.getElementById('itemPrice').value='';
+    renderItems();
+  });
+}
+function renderItems(){
+  const me=getMe(); const db=loadDB();
+  const myItems=db.items.filter(i=>i.owner===me.id);
+  const grid=document.getElementById('itemsGrid'); grid.innerHTML='';
+  myItems.forEach(it=>{
+    const div=document.createElement('div'); div.className='item';
+    div.innerHTML=`<img src="${it.img}"><div style="padding:8px"><div style="font-weight:700">${it.title}</div><div class="muted">${Number(it.price).toFixed(2)}</div></div>`;
+    grid.appendChild(div);
+  });
+}
+function promptWithdraw(){
+  const amt=prompt(t('amt')); const v=parseFloat(amt||'0'); if(!v||v<=0) return;
+  const db=loadDB(); const me=getMe();
+  const id=uid(db.withdrawals);
+  db.withdrawals.push({id,userId:me.id,amount:v,status:'pending',createdAt:Date.now()});
+  saveDB(db); renderWithdrawals();
+}
+function renderWithdrawals(){
+  const db=loadDB(); const me=getMe();
+  const list=document.getElementById('withdrawalsList'); list.innerHTML='';
+  const S = {en:{pending:'Pending',approved:'Approved',rejected:'Rejected'},
+             si:{pending:'කැඳවමින්',approved:'අනුමත',rejected:'ප්‍රතික්ෂේප'},
+             ta:{pending:'நிலுவையில்',approved:'ஒப்புதல்',rejected:'நிராகரிக்கப்பட்டது'}}[getLang()];
+  db.withdrawals.filter(w=>w.userId===me.id).sort((a,b)=>b.id-a.id).forEach(w=>{
+    const row=document.createElement('div'); row.className='row'; row.style.alignItems='center';
+    row.innerHTML=`<div class="card" style="flex:1">
+      ${new Date(w.createdAt).toLocaleString()} — <strong>${w.amount.toFixed? w.amount.toFixed(2):Number(w.amount).toFixed(2)}</strong>
+      <span class="right pill">${S[w.status]}</span></div>`;
+    list.appendChild(row);
+  });
+}
+
+/* ===== admin ===== */
+function renderAdmin(){
+  const me=getMe(); if(!me || me.role!=='admin'){ showView('loginView'); return }
+  const db=loadDB();
+  // Users table
+  const wrap=document.getElementById('usersTable'); wrap.innerHTML='';
+  db.users.forEach(u=>{
+    const card=document.createElement('div'); card.className='card';
+    card.innerHTML=`
+      <div style="font-weight:700">${u.name} <span class="badge">${u.role}</span></div>
+      <div class="muted">${u.phone}</div>
+      <label data-i18n="balance">${t('balance')}</label>
+      <input type="number" step="0.01" value="${u.balance||0}" id="bal_${u.id}">
+      <button class="btn" onclick="saveBal(${u.id})" style="margin-top:8px">${t('actions')} • ${t('save')||'Save'}</button>
+    `;
+    wrap.appendChild(card);
+  });
+  // Withdrawals
+  renderAdminWithdrawals();
+  applyLang();
+}
+function saveBal(uid){
+  const db=loadDB(); const input=document.getElementById('bal_'+uid);
+  const v=parseFloat(input.value||'0'); const u=db.users.find(x=>x.id===uid); if(!u) return;
+  u.balance=v; saveDB(db); alert(t('saved'));
+  if(getMe().id===uid) document.getElementById('meBalance')?.textContent = v.toFixed(2);
+}
+function renderAdminWithdrawals(){
+  const db=loadDB(); const list=document.getElementById('adminWithdrawals'); list.innerHTML='';
+  db.withdrawals.slice().sort((a,b)=>b.id-a.id).forEach(w=>{
+    const u=db.users.find(x=>x.id===w.userId);
+    const row=document.createElement('div'); row.className='card';
+    row.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-weight:700">${u?.name||'User'}</div>
+      <div class="muted">${u?.phone||''}</div>
+      <div class="muted">${new Date(w.createdAt).toLocaleString()}</div>
+      <div><strong>${Number(w.amount).toFixed(2)}</strong> — <span class="pill">${w.status}</span></div></div>
+      <div class="row">
+        <button class="btn outline" onclick="setW(${w.id},'approved')" data-i18n="approve">${t('approve')}</button>
+        <button class="btn outline" onclick="setW(${w.id},'rejected')" data-i18n="reject">${t('reject')}</button>
+      </div></div>`;
+    list.appendChild(row);
+  });
+}
+function setW(id,status){
+  const db=loadDB(); const w=db.withdrawals.find(x=>x.id===id); if(!w) return;
+  if(w.status!=='pending') return;
+  w.status=status;
+  if(status==='approved'){
+    const u=db.users.find(x=>x.id===w.userId); if(u) u.balance = Number(u.balance||0) - Number(w.amount||0);
+  }
+  saveDB(db); renderAdminWithdrawals(); if(getMe()?.role!=='admin') renderWithdrawals(); else renderDash();
+}
+
+/* ===== boot ===== */
+function boot(){
+  loadDB(); // ensure seed
+  applyLang(); refreshNav();
+  const me=getMe();
+  if(me) showView(me.role==='admin'?'adminView':'dashView'); else showView('homeView');
+}
+document.addEventListener('DOMContentLoaded', boot);
+</script>
+</body>
+</html>
